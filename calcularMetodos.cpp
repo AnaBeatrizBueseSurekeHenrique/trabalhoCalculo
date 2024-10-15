@@ -1,7 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <string>
-#include "trabalhoCalculo.h"
+#include "lerString.h"
 
 using namespace std;
 
