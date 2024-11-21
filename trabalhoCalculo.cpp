@@ -1,5 +1,5 @@
 #include <iostream>
-#include "gaussSeiden.h"
+#include "gaussSeidel.h"
 #include <string>
 #include <cctype>
 #include <algorithm>
@@ -13,7 +13,7 @@ int main(){
     char entrada;
     cout << "1. Calculadora" << endl;
     cout << "2. Metodos" << endl;
-    cout << "3. Gauss-Seiden" << endl;
+    cout << "3. Gauss-Seidel" << endl;
     cin >> entrada;
     switch(entrada){
         case '1':
@@ -55,7 +55,7 @@ void calculadora(){
 
 void metodos(){
     double r1, r2, prec, prec2;
-    int max;
+    int max, casasDecimais;
     int itera;
     int entrada;
     string equacao, equacao2;
@@ -71,6 +71,8 @@ void metodos(){
             cin >> r2;
             cout << "Insira o valor da precisao: " << endl;
             cin >> prec;
+            cout << "Insira a quantidade de casas decimais" << endl;
+            cin >> casasDecimais;
             cout << "Insira o valor maximo de iteracoes: " << endl;
             cin >> max;
             cout << "Insira a equacao: " << endl;
@@ -78,7 +80,7 @@ void metodos(){
             getline(cin, equacao);
             equacao.erase(remove_if(equacao.begin(), equacao.end(), ::isspace),
                 equacao.end());
-            cout << "Raiz: " << bisseccao(r1,r2, prec, max, &itera, equacao) << endl;
+            cout << "Raiz: " << bisseccao(r1,r2, prec, max, &itera, equacao, casasDecimais) << endl;
             cout << "Numero de iteracoes: " << itera;
             break;
         case 2:
@@ -86,6 +88,8 @@ void metodos(){
             cin >> r1;
             cout << "Insira o valor da precisao: " << endl;
             cin >> prec;
+            cout << "Insira a quantidade de casas decimais" << endl;
+            cin >> casasDecimais;
             cout << "Insira o valor maximo de iteracoes: " << endl;
             cin >> max;
             cout << "Insira a equacao: " << endl;
@@ -97,7 +101,7 @@ void metodos(){
             getline(cin, equacao2);
             equacao2.erase(remove_if(equacao2.begin(), equacao2.end(), ::isspace),
                 equacao2.end());
-            cout << "Raiz: " << mil(r1,prec,max, &itera, equacao, equacao2) << endl;
+            cout << "Raiz: " << mil(r1,prec,max, &itera, equacao, equacao2, casasDecimais) << endl;
             cout << "Numero de iteracoes: " << itera;
             break;
         case 3:
@@ -105,6 +109,8 @@ void metodos(){
             cin >> r1;
             cout << "Insira o valor da precisao: " << endl;
             cin >> prec;
+            cout << "Insira a quantidade de casas decimais" << endl;
+            cin >> casasDecimais;
             cout << "Insira o valor maximo de iteracoes: " << endl;
             cin >> max;
             cout << "Insira a equacao: " << endl;
@@ -116,7 +122,7 @@ void metodos(){
             getline(cin, equacao2);
             equacao2.erase(remove_if(equacao2.begin(), equacao2.end(), ::isspace),
                 equacao2.end());
-            cout << "Raiz: " << newton(r1,prec,max, &itera, equacao, equacao2);
+            cout << "Raiz: " << newton(r1,prec,max, &itera, equacao, equacao2, casasDecimais);
             cout << endl << "Numero de iteracoes: " << itera << endl;
             break;
         case 4:
@@ -126,6 +132,8 @@ void metodos(){
             cin >> r2;
             cout << "Insira o valor da precisao: " << endl;
             cin >> prec;
+            cout << "Insira a quantidade de casas decimais" << endl;
+            cin >> casasDecimais;
             cout << "Insira o valor maximo de iteracoes: " << endl;
             cin >> max;
             cout << "Insira a equacao: " << endl;
@@ -133,7 +141,7 @@ void metodos(){
             getline(cin, equacao);
             equacao.erase(remove_if(equacao.begin(), equacao.end(), ::isspace),
                 equacao.end());
-            cout << "Raiz: " << secante(r1, r2, prec, max, equacao, &itera);
+            cout << "Raiz: " << secante(r1, r2, prec, max, equacao, &itera, casasDecimais);
             cout << endl << "Numero de iteracoes: " << itera << endl;
             break;
         case 5:
@@ -145,6 +153,8 @@ void metodos(){
             cin >> prec;
             cout << "Insira o valor da Prec2: " << endl;
             cin >> prec2;
+            cout << "Insira a quantidade de casas decimais" << endl;
+            cin >> casasDecimais;
             cout << "Insira o valor maximo de iteracoes: " << endl;
             cin >> max;
             cout << "Insira a equacao: " << endl;
@@ -152,13 +162,14 @@ void metodos(){
             getline(cin, equacao);
             equacao.erase(remove_if(equacao.begin(), equacao.end(), ::isspace),
                 equacao.end());
-            cout << setprecision(20) << "Raiz: " << falsi(r1, r2, prec, prec2 , max, equacao, &itera) << fixed;
+            cout << setprecision(casasDecimais) << "Raiz: " << falsi(r1, r2, prec, prec2 , max, equacao, &itera, casasDecimais) << fixed;
             cout << endl << "Numero de iteracoes: " << itera << endl;
             break;
     }
 }
 double realizaEquacao(){
     no* noEquacao;
+    bool resolucao;
     string str;
     double x;
     int i;
@@ -188,8 +199,9 @@ double realizaEquacao(){
         }
         cout << "Insira o valor inicial para x" << j << ":";
         cin >> x;
-        noEquacao = insereNo(noEquacao, str, x);
+        noEquacao = insereNo(noEquacao, str, x, j);
     }
+    
     double prec;
     cout << "Insira a precisao: " << endl;
     cin >> prec;
@@ -197,13 +209,20 @@ double realizaEquacao(){
     cin >> max;
     cout << "Insira a quantidade de casas decimais: " << endl;
     cin >> casas;
-    if(criterioSassenfeld(noEquacao, i)){
+    noEquacao = criterioAplicacao(noEquacao, i, &resolucao);
+    if(resolucao){
         no *aux = noEquacao;
         int j = 1;
         for(int j = 1; j<= i; j++){
             aux->equacao = recriaEquacao(aux->equacao, j);
+            aux = aux->link;
+        }
+        aux = noEquacao;
+        while(aux != NULL){
+            aux = aux->link;
         }
         noEquacao = realiza(noEquacao, prec, &itera, max, casas);
+        
         cout << endl << endl << "Valores finais: ";
         mostraValores(noEquacao, casas);
         cout << "Numero de iteracoes: " << itera;

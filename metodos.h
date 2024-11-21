@@ -19,7 +19,7 @@ double funcItera(double x){
     return result;
 }
 
-double bisseccao(double r1, double r2, double prec, int max, int *itera, string equacao){
+double bisseccao(double r1, double r2, double prec, int max, int *itera, string equacao, int casasDecimais){
     string aux;
     *itera = 0;
     double fIn, meio, fMeio;
@@ -27,7 +27,7 @@ double bisseccao(double r1, double r2, double prec, int max, int *itera, string 
         while(moduloEq(r1,r2) > prec && *itera < max){
             meio = (r1+r2)/2;
             (*itera)++;
-            cout << setprecision(20) <<  "x" << *itera << " = " << meio<< fixed << endl;
+            cout << setprecision(casasDecimais) <<  fixed << "x" << *itera << " = " << meio<<  endl;
             aux = equacao;
             fIn = realizaEquacao(aux, r1);
             aux = equacao;
@@ -44,13 +44,13 @@ double bisseccao(double r1, double r2, double prec, int max, int *itera, string 
     }
 }
 
-double mil(double x, double prec, int MAX, int *itera, string equacao, string equacaoIterativa){
+double mil(double x, double prec, int MAX, int *itera, string equacao, string equacaoIterativa, int casasDecimais){
     *itera = 1;
     double result;
     double antX = x;
     if(moduloVar(realizaEquacao(equacao,x)) > prec){
         x = realizaEquacao(equacaoIterativa, antX);
-        cout << setprecision(20) << "x" << *itera << " = " << x<< fixed << endl;
+        cout << setprecision(casasDecimais) << fixed << "x" << *itera << " = " << x<<  endl;
         while(moduloVar(realizaEquacao(equacao,x)) > prec && moduloEq(x, antX) > prec && *itera < MAX){
             (*itera)++;    
             antX = x;
@@ -61,14 +61,14 @@ double mil(double x, double prec, int MAX, int *itera, string equacao, string eq
     return x;
 }
 
-double newton(double x0, double prec, double max,int *itera, string equacao, string derivada){
+double newton(double x0, double prec, double max,int *itera, string equacao, string derivada, int casasDecimais){
     *itera = 1;
     double fx, fxlinha, x1;
     fx = realizaEquacao(equacao, x0);
     if(moduloVar(fx) > prec){
         fxlinha = realizaEquacao(derivada, x0);
         x1 = x0 - (fx/fxlinha);
-        cout << setprecision(20) << "x" << *itera << " = " << x1 << fixed << endl;
+        cout << setprecision(casasDecimais) << fixed << "x" << *itera << " = " << x1 <<  endl;
         fx = realizaEquacao(equacao, x1);
         while((moduloVar(fx) > prec && moduloEq(x1,x0) > prec) && (*itera) <= max){
             (*itera)++;
@@ -84,7 +84,7 @@ double newton(double x0, double prec, double max,int *itera, string equacao, str
     }
 }
 
-double secante( double x0, double x1, double prec, int max, string equacao, int *it){
+double secante( double x0, double x1, double prec, int max, string equacao, int *it, int casasDecimais){
     *it = 0;
     double x2;
     if(moduloVar(realizaEquacao(equacao, x0)) < prec){
@@ -97,7 +97,7 @@ double secante( double x0, double x1, double prec, int max, string equacao, int 
                 x2 = x1;
                 x1 = x1 - (realizaEquacao(equacao, x1)*(x1 - x0))/(realizaEquacao(equacao, x1) - realizaEquacao(equacao, x0));
                 x0 = x2;
-                cout << setprecision(20) << "x" << (*it) + 2 << " =" << x1 << fixed << endl;
+                cout << setprecision(casasDecimais) << fixed << "x" << (*it) + 2 << " =" << x1 <<  endl;
                 (*it)++;
             }
             return x1;
@@ -105,7 +105,7 @@ double secante( double x0, double x1, double prec, int max, string equacao, int 
     }
 }
 
-double falsi( double a, double b, double prec1, double prec2, int max, string equacao, int *itera){
+double falsi( double a, double b, double prec1, double prec2, int max, string equacao, int *itera, int casasDecimais){
     *itera = 0;
     double x, m;
     if(moduloEq(a,b) < prec1){
@@ -117,7 +117,7 @@ double falsi( double a, double b, double prec1, double prec2, int max, string eq
             x = (a*realizaEquacao(equacao, b) - b*realizaEquacao(equacao, a)) / (realizaEquacao(equacao,b) - realizaEquacao(equacao,a));
             
             m = realizaEquacao(equacao, a);
-            cout << setprecision(20) <<"x" << *itera << " = " << x << fixed<< endl;
+            cout << setprecision(casasDecimais) << fixed <<"x" << *itera << " = " << x << endl;
             (*itera)++;
             while(moduloVar(realizaEquacao(equacao, x)) > prec2 &&  (*itera) < max && moduloEq(a,b)){
                 if(m*(realizaEquacao(equacao, x)) > 0){

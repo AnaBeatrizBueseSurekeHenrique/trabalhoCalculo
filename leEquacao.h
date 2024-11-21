@@ -117,6 +117,7 @@ double numero(string str, int *it){
             (*it)++;
         }
     }
+    
     while(*it < str.size() && isdigit(str[*it]) || str[*it] == '.'){
         aux = "";
         if(isdigit(str[*it])){
@@ -125,6 +126,7 @@ double numero(string str, int *it){
                 (*it)++;
             }
             inteiros = stoi(aux, 0, 10);
+            //cout << "INTTTTTTT: " << inteiros << endl;
         } else{
             if(str[*it] == '.'){
                 exp = 0;
@@ -141,6 +143,7 @@ double numero(string str, int *it){
             }
         } 
     }
+  //  cout << "INTEIROS: " << inteiros << endl;
     result = result*(inteiros + decimal);
     return result;
 }
