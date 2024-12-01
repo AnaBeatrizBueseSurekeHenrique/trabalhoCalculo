@@ -40,11 +40,14 @@ int encontrarPos(string str, string x, int num){
         pos++;
         encontradas++;
     }
-    return pos - 1;
+    if(pos > 0){
+        pos--;
+    }
+    return pos;
 }
 
 string recriaEquacao(string str, int num){
-    int pos = encontrarPos(str, "x", num);
+    int pos = encontrarPos(str, "x" + to_string(num), 1);
     string div = "", numeros;
     int i = pos, aux1, valor;
     aux1 = i;
@@ -77,16 +80,7 @@ string recriaEquacao(string str, int num){
     novaString += aux + ")/" + div; 
     return novaString;
 }
-/*
-    x3 = 2
-    Insira a equacao:  2x1+1x2+3x3=9
-    Insira o valor inicial para x1:0
-    Insira a equacao: 0x1-1x2+1x3=1
-    Insira o valor inicial para x2:0
-    Insira a equacao: 1x1+0x2+3x3=3
-    COISAS PRA FAZER: NUM MAXIMO DE ITERACOES NAO TA FUNCIONANDO
-    ALTERNAR TAMBEM O VALOR DE X NO MUDA COLUNAS!!!!
-*/
+
 no *insereNo(no *L, string str, double x, int num) {
 	no *N, *P;
 	N = new no;
@@ -105,14 +99,22 @@ no *insereNo(no *L, string str, double x, int num) {
 	} 
 	return L;
 }
+void mostrarEquacao(no *L){
+    no* aux = L;
+    while(aux != NULL){
+        cout << "EQ: " << aux->equacao << endl;
+        cout << "VAL: " << aux->numx << endl;
+        aux = aux->link;
+    }
+}
 
 no* mudarEquacao(no *L, int no1, int no2){
     no* aux = L, *aux2 = L;
     string eq;
-    for(int i = 1; i < no1; i++){
+    while(aux->numx != no1){
         aux = aux->link;
     }
-    for(int i = 1; i < no2; i++){
+    while(aux2->numx != no2){
         aux2 = aux2->link;
     }
     eq = aux->equacao;
@@ -120,7 +122,6 @@ no* mudarEquacao(no *L, int no1, int no2){
     aux2->equacao = eq;
     return L;
 }
-
 
 bool criterioSassenfeld (no *L, int qntdequacoes){
     no *valorPrincipal = inicializaNo(valorPrincipal);
@@ -152,12 +153,14 @@ bool criterioSassenfeld (no *L, int qntdequacoes){
         }  
         eq.pop_back();
         eq += ")/" + div;
-        if(div != "0"){
-            double max2 = realizaEquacao(eq, 0);
-            aux->valorx = max2;
-            if(max < max2){
-                max = max2;
-            }
+        double max2;
+        max2 = moduloVar(realizaEquacao(eq, 0));
+        aux->valorx = max2;
+        if(div == "0"){
+            return false;
+        }
+        if(max < max2){
+            max = max2;
         }
         aux = aux->link;
         num++;
@@ -171,75 +174,119 @@ bool criterioSassenfeld (no *L, int qntdequacoes){
 no* mudarColunas(no* L, int no1, int no2){
     no *aux = L;
     double xValor;
+    bool negativo;
     while(aux != NULL){
         string str = aux->equacao;
-        if(str[0] != '-'){
-            str = "+" + str;
-        }
         int pos1 = str.find("x" + to_string(no1));
         int aux1 = pos1, max1, max2, min1, min2, tam1, tam2;
-        while(isdigit(str[pos1+1])){
+        while(isdigit(str[pos1+1]) || str[pos1+1] == 'x'){
             pos1++;
         }
         max1 = pos1;
         int pos2 = str.find("x" + to_string(no2));
-    
         int aux2 = pos2, min, max;
-        while(isdigit(str[pos2+1])){
+        while(isdigit(str[pos2+1]) || str[pos2+1] == 'x'){
             pos2++;
         }
         max2 = pos2;
-        while(aux1 >= 0 && (isdigit(str[aux1-1]) || (str[aux1-1] == '.') || (str[aux1-1] == 'x'))){
+
+        while(aux1 > 0 && str[aux1-1] != '-' && str[aux1-1] != '+'){
             aux1--;
         }
-        while(aux2 >= 0 && (isdigit(str[aux2-1]) || (str[aux2-1] == '.') || (str[aux2-1] == 'x'))){
+        while(aux2 > 0 && str[aux2-1] != '-' && str[aux2-1] != '+'){
             aux2--;
         }
         min1 = aux1;
-        min2 = aux2;
         tam1 = max1 - min1 + 1;
+        min2 = aux2;
         tam2 = max2 - min2 + 1;
         string x1 = "", x2 = "";
-        if(aux2 > 0 && str[aux2 - 1] == '-'){
-            aux2--;
-            tam1++;
-            tam2++;
-            if(min1 > 0){
-                min1--;
+        if(min2 > min1){
+            int aux;
+            
+            aux = min2;
+            min2 = min1;
+            min1 = aux;
+
+            aux = pos1;
+            pos1 = pos2;
+            pos2 = aux;
+            
+            aux = tam1;
+            tam1 = tam2,
+            tam2 = aux;
+            
+            aux = aux1;
+            aux1 = aux2;
+            aux2 = aux;
+
+        } 
+        if(str[aux2-1] != '-' || str[aux1-1] != '-'){
+            if(aux2 > 0 && str[aux2 - 1] == '-'){
+                if(aux1 == 0){
+                    if(str[0] != '-'){
+                        str = "+" + str;
+                    }
+                    pos1++;
+                    pos2++;
+                } else{
+                    aux1--;
+                    if(aux2 > 0){
+                        aux2--;
+                    }
+                    min1--;
+                }
+                tam1++;
+                tam2++;
+               
             }
-            if(min2 > 0){
-                min2--;
+            if(aux1 > 0 && str[aux1 - 1] == '-'){
+                if(aux2 == 0){
+                    if(str[0] != '-'){
+                        str = "+" + str;
+                    }
+                    pos1++;
+                    pos2++;
+                } else{
+                    aux2--;
+                    if(aux1 > 0){
+                        aux1--;
+                    }
+                    min2--;
+                }
+                tam2++;
+                tam1++;
+                
             }
-            x1 = "+";
-        }
-        if(aux1 > 0 && str[aux1 - 1] == '-'){
-            aux1--;
-            tam2++;
-            tam1++;
-            if(min2 > 0){
-                min2--;
-            }
-            if(min1 > 0){
-                min1--;
-            }
-            x2 = "+";
         }
         x1 += str.substr(aux1, pos1 - aux1 + 1);
         x2 += str.substr(aux2, pos2 - aux2 + 1);
-        str.replace(min1, tam1, x2);
-        str.replace(min2, tam2, x1);
+        str.erase(min1,tam1);
+        str.insert(min1, x2);
+        min2 = encontrarPos(str, x2, 1);
+        max2 = min2;
+        while(max2 < str.size() && str[max2+1] != '-' && str[max2+1] != '+' && str[max2+1] != '='){
+            max2++;
+        }
+        while(min2 > 0 && str[min2-1] != '-' && str[min2-1] != '+'){
+            min2--;
+        }
+        str.erase(min2, tam2);
+        str.insert(min2, x1);
         if(str[0] == '+'){
             str.erase(0, 1);
         }
+
         aux->equacao = str;
         aux = aux->link;
     }
     aux = L;
-    for(int i = 1; i < no1; i++){
+
+    while(aux->numx != no1){
         aux = aux->link;
     }
     no *aux2 = L;
-    for(int i = 1; i < no2; i++){
+    while(aux2->numx != no2){
         aux2 = aux2->link;
     }
     xValor = aux->valorx;
@@ -252,40 +299,89 @@ no* mudarColunas(no* L, int no1, int no2){
     return L;
 }
 
-void mostrarEquacao(no *L){
-    no* aux = L;
-    while(aux != NULL){
-        cout << "EQ: " << aux->equacao << endl;
-        cout << "VAL: " << aux->numx << endl;
-        aux = aux->link;
-    }
-}
 no* criterioAplicacao(no *L, int qntdequacoes, bool *resolucao){
     int i = 1;
-    *resolucao = criterioSassenfeld(L, qntdequacoes);
-    while(i <= qntdequacoes && !(*resolucao)){
-        int j = 1;
-        while(j <= qntdequacoes && !(*resolucao)){
-            if(j != i){
-                L = mudarEquacao(L, i, j);
-                *resolucao = criterioSassenfeld(L, qntdequacoes);
-                if(!*resolucao){               
-                    L = mudarColunas(L, i, j);
-                    *resolucao = criterioSassenfeld(L, qntdequacoes);
-                    if(!resolucao){
-                        L = mudarColunas(L, i,j);
-                        L = mudarEquacao(L, i, j);
-                    }
+    bool aux;
+    aux = criterioSassenfeld(L, qntdequacoes);
+    while(i <= qntdequacoes && !aux){
+        int j = i+1;
+        while(j <= qntdequacoes && !aux){
+            L = mudarEquacao(L, i, j);
+            aux = criterioSassenfeld(L, qntdequacoes);
+            if(!aux){   
+                L = mudarColunas(L, i, j);
+                aux = criterioSassenfeld(L, qntdequacoes);
+                if(!aux){
+                    L = mudarColunas(L, i,j);
+                    L = mudarEquacao(L, i, j);
                 }
             }
             j++;
         }
         i++;
     }
+    *(resolucao) = aux;
     return L;
 }
 
-
+no* haZero(no *L, int posZero, bool *resolver, int qntd, int tamanho){
+    no* aux = L;
+    int i = 1;
+    bool resolvAux = *resolver;
+    while(aux != NULL && !resolvAux){
+        if(aux->numx != posZero){
+            int pos = encontrarPos(aux->equacao, "x", posZero);
+            string div = "", numeros;
+            int i = pos, aux1, valor;
+            aux1 = i;
+            while(aux1 >= 0 && (isdigit(aux->equacao[aux1-1]) || (aux->equacao[aux1-1] == '.') || (aux->equacao[aux1-1] == 'x'))){
+                aux1--;
+            }
+            div += aux->equacao.substr(aux1, i - aux1);
+            if(div != "0"){
+                no *aux2 = L;
+                while(aux2->numx != posZero){
+                    aux2 = aux2->link;
+                }
+                int pos = encontrarPos(aux->equacao, "x", posZero);
+                string div = "", numeros;
+                int i = pos, aux1, valor;
+                aux1 = i;
+                while(aux1 >= 0 && (isdigit(aux2->equacao[aux1-1]) || (aux2->equacao[aux1-1] == '.') || (aux2->equacao[aux1-1] == 'x'))){
+                    aux1--;
+                }
+                div += aux->equacao.substr(aux1, i - aux1);
+                if(div != "0"){
+                    L = mudarEquacao(L, posZero, aux->numx);
+                    resolvAux = true;
+                }
+            }
+        }
+        aux = aux->link;
+        i++;
+    }
+    aux = L;
+    while(aux != NULL){
+        int pos = encontrarPos(aux->equacao, "x", aux->numx);
+        string div = "";
+        int i = pos, aux1;
+        aux1 = i;
+        while(aux1 >= 0 && (isdigit(aux->equacao[aux1-1]) || (aux->equacao[aux1-1] == '.') || (aux->equacao[aux1-1] == 'x'))){
+            aux1--;
+        }
+        div += aux->equacao.substr(aux1, i - aux1);
+        if(div == "0"){
+            resolvAux = false;
+            posZero = aux->numx;
+        }
+        aux = aux->link;
+    }
+     *(resolver) = resolvAux;
+    if(resolvAux == false && qntd < tamanho){
+        haZero(L, posZero, resolver, qntd + 1, tamanho);
+    }
+    return L;
+}
 bool calculoPrec(double prec, no*L, no *N){
     no* Aux = L;
     double maxEq = -1, maxNum = -1;
@@ -308,26 +404,25 @@ bool calculoPrec(double prec, no*L, no *N){
     }
 }
 
-void mostraValores(no *L, int casasDecimais){
-    no *aux = L;
+void mostraValores(no *L, int casasDecimais, int numEq){
+    no *aux;
     int i = 1, x;
     cout << endl;
     string str = "";
 
-     while(aux != NULL){
-        int pos = 0;
-        while(!(isdigit(aux->equacao[pos]))){
-            pos++;
+     while(i <= numEq){
+        aux = L;
+        while(aux->numx != i){
+            aux = aux->link;
         }
-        x = numero(aux->equacao, &pos);
-        cout << "x" << x  << " = " << setprecision(casasDecimais) <<  fixed << aux->valorx <<endl;
+        cout << "x" << i  << " = " << setprecision(casasDecimais) <<  fixed << aux->valorx <<endl;
         aux = aux->link;
         i++;
     }
 }
 
 
-no* realiza(no* L, double prec, int *it, int max, int casaDecimais){
+no* realiza(no* L, double prec, int *it, int max, int casaDecimais, int numEq){
     no* aux = L;
     no* aux2 = L;
     no* aux3 = inicializaNo(aux3);
@@ -357,11 +452,16 @@ no* realiza(no* L, double prec, int *it, int max, int casaDecimais){
     }
     (*it)++;
     cout << "Iteracao: " << *it;
-    mostraValores(L, casaDecimais);
-    if(calculoPrec(prec, L, aux3) && (*it) < max){
+    mostraValores(L, casaDecimais, numEq);
+    if(calculoPrec(prec, L, aux3) || (*it) >= max){
         return L;
     } else{
-        realiza(L, prec, it, max, casaDecimais); 
+        realiza(L, prec, it, max, casaDecimais, numEq); 
     }
 }
-
+/* 0x1+3x2+6x3=0
+Insira o valor inicial para x1:0
+Insira a equacao:  2x1+0x2+4x3=6
+Insira o valor inicial para x2:0
+Insira a equacao: 1x1+3x2+1x3=-2
+Insira o valor inicial para x3:0*/

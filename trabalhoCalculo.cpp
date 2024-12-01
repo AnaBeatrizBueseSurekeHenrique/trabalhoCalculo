@@ -8,7 +8,7 @@ using namespace std;
 void guia();
 void calculadora();
 void metodos();
-double realizaEquacao();
+void realizaGauss();
 int main(){
     char entrada;
     cout << "1. Calculadora" << endl;
@@ -23,7 +23,7 @@ int main(){
             metodos();
             break;
         case '3':
-            realizaEquacao();
+            realizaGauss();
             break;
     }
 }
@@ -167,14 +167,16 @@ void metodos(){
             break;
     }
 }
-double realizaEquacao(){
+
+void realizaGauss(){
     no* noEquacao;
-    bool resolucao;
+    bool resolucao, possivelComZero = true;
     string str;
     double x;
     int i;
-    int pos;
+    int pos, posZero;
     int max, itera = 0, casas;
+    bool mudarLinhas = false;
     cout << "Insira a quantidade de equacoes: ";
     cin >> i;
     guia();
@@ -189,19 +191,15 @@ double realizaEquacao(){
                 str.end());
             pos = str.find("0x"+to_string(j));
             if(pos != string::npos && !isdigit(str[pos-1])){
-            while(pos != string::npos){
-                cout << "Nao ha multiplicador de x" << j << ", insira uma linha que contenha!" << endl;
-                getline(cin, str);
-                str.erase(remove_if(str.begin(), str.end(), ::isspace),
-                    str.end());
-                pos = str.find(("0x"+to_string(j)));
+            if(pos != string::npos){
+               mudarLinhas = true;
+               posZero = j;
             }
         }
         cout << "Insira o valor inicial para x" << j << ":";
         cin >> x;
         noEquacao = insereNo(noEquacao, str, x, j);
     }
-    
     double prec;
     cout << "Insira a precisao: " << endl;
     cin >> prec;
@@ -209,25 +207,26 @@ double realizaEquacao(){
     cin >> max;
     cout << "Insira a quantidade de casas decimais: " << endl;
     cin >> casas;
-    noEquacao = criterioAplicacao(noEquacao, i, &resolucao);
-    if(resolucao){
-        no *aux = noEquacao;
-        int j = 1;
-        for(int j = 1; j<= i; j++){
-            aux->equacao = recriaEquacao(aux->equacao, j);
-            aux = aux->link;
-        }
-        aux = noEquacao;
-        while(aux != NULL){
-            aux = aux->link;
-        }
-        noEquacao = realiza(noEquacao, prec, &itera, max, casas);
-        
-        cout << endl << endl << "Valores finais: ";
-        mostraValores(noEquacao, casas);
-        cout << "Numero de iteracoes: " << itera;
-    } else{
-        cout << "Nao e possivel solucionar solucionar este sistema com Gauss-Seidel" << endl;
+    if(mudarLinhas){
+        noEquacao = haZero(noEquacao, posZero, &possivelComZero, 0, i);
     }
-
+    if(possivelComZero){
+        noEquacao = criterioAplicacao(noEquacao, i, &resolucao);
+        if(resolucao){
+            no *aux = noEquacao;
+            int j = 1;
+            for(int j = 1; j<= i; j++){
+                aux->equacao = recriaEquacao(aux->equacao, aux->numx);
+                aux = aux->link;
+            }
+            noEquacao = realiza(noEquacao, prec, &itera, max, casas,i);
+            cout << endl << endl << "Valores finais: ";
+            mostraValores(noEquacao, casas, i);
+            cout << "Numero de iteracoes: " << itera;
+        } else{
+            cout << "Nao e possivel solucionar este sistema com Gauss-Seidel" << endl;
+        }
+    } else{
+        cout << "Nao e possivel solucionar este sistema" << endl;
+    }
 }
